@@ -1,0 +1,140 @@
+@import "tailwindcss";
+
+:root {
+  /* Primary Colors - Modern Blue Gradient */
+  --color-primary: 37 99 235;
+  --color-primary-light: 96 165 250;
+  --color-primary-dark: 29 78 216;
+  
+  /* Secondary Colors - Fresh Teal */
+  --color-secondary: 16 185 129;
+  --color-secondary-light: 52 211 153;
+  --color-secondary-dark: 5 150 105;
+
+  /* Background Colors */
+  --color-bg: 248 250 252;
+  --color-surface: 255 255 255;
+  --color-surface-hover: 241 245 249;
+
+  /* Text Colors */
+  --color-text: 15 23 42;
+  --color-text-light: 30 41 59;
+  --color-muted: 100 116 139;
+  --color-muted-light: 148 163 184;
+
+  /* Border Colors */
+  --color-border: 226 232 240;
+  --color-border-light: 241 245 249;
+
+  /* Status Colors */
+  --color-success: 34 197 94;
+  --color-warning: 234 179 8;
+  --color-danger: 239 68 68;
+  --color-info: 59 130 246;
+
+  /* Accent Colors */
+  --color-purple: 139 92 246;
+  --color-pink: 236 72 153;
+  --color-orange: 249 115 22;
+}
+
+.dark {
+  /* Primary Colors - Brighter for dark mode */
+  --color-primary: 59 130 246;
+  --color-primary-light: 96 165 250;
+  --color-primary-dark: 37 99 235;
+  
+  /* Secondary Colors */
+  --color-secondary: 52 211 153;
+  --color-secondary-light: 16 185 129;
+  --color-secondary-dark: 5 150 105;
+
+  /* Background Colors */
+  --color-bg: 15 23 42;
+  --color-surface: 30 41 59;
+  --color-surface-hover: 51 65 85;
+
+  /* Text Colors */
+  --color-text: 248 250 252;
+  --color-text-light: 226 232 240;
+  --color-muted: 148 163 184;
+  --color-muted-light: 100 116 139;
+
+  /* Border Colors */
+  --color-border: 51 65 85;
+  --color-border-light: 71 85 105;
+
+  /* Status Colors */
+  --color-success: 34 197 94;
+  --color-warning: 234 179 8;
+  --color-danger: 239 68 68;
+  --color-info: 59 130 246;
+
+  /* Accent Colors */
+  --color-purple: 139 92 246;
+  --color-pink: 236 72 153;
+  --color-orange: 249 115 22;
+}
+
+[data-theme="sunset"] {
+  --color-primary: 249 115 22;
+  --color-secondary: 244 63 94;
+
+  --color-bg: 255 247 237;
+  --color-surface: 255 255 255;
+
+  --color-text: 30 41 59;
+  --color-muted: 100 116 139;
+
+  --color-border: 251 146 60;
+}
+
+[data-theme="forest"] {
+  --color-primary: 34 197 94;
+  --color-secondary: 16 185 129;
+
+  --color-bg: 240 253 244;
+  --color-surface: 255 255 255;
+
+  --color-text: 22 101 52;
+  --color-muted: 74 222 128;
+
+  --color-border: 187 247 208;
+}
+[data-theme="amber"] {
+  --color-primary: 245 158 11;
+  --color-secondary: 251 191 36;
+
+  --color-bg: 255 251 235;
+  --color-surface: 255 255 255;
+
+  --color-text: 120 53 15;
+  --color-muted: 180 83 9;
+
+  --color-border: 253 230 138;
+}
+[data-theme="neon"] {
+  --color-primary: 20 184 166;
+  --color-secondary: 34 211 238;
+
+  --color-bg: 15 23 42;
+  --color-surface: 30 41 59;
+
+  --color-text: 226 232 240;
+  --color-muted: 148 163 184;
+
+  --color-border: 51 65 85;
+}
+
+[data-theme="carbon"] {
+  --color-primary: 75 85 99;
+  --color-secondary: 107 114 128;
+
+  --color-bg: 17 24 39;
+  --color-surface: 31 41 55;
+
+  --color-text: 229 231 235;
+  --color-muted: 156 163 175;
+
+  --color-border: 55 65 81;
+}
