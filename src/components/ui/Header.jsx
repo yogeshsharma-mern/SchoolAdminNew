@@ -1,4 +1,4 @@
-import React, { useRef,useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   Menu,
@@ -13,45 +13,51 @@ import {
   Sun,
   Grid,
   Command,
-  Sparkles
+  Sparkles,
+  Palette,
+  Check
 } from 'lucide-react';
 import { toggleSidebarCollapse } from '../../redux/features/ui/uislice';
 
 const ModernHeader = () => {
   const dispatch = useDispatch();
   const { sidebarCollapsed } = useSelector((state) => state.ui);
-const [isDark, setIsDark] = useState(() => {
-  const savedTheme = localStorage.getItem("theme");
-  return savedTheme === "dark";
-});
+  
+  // Get initial theme from localStorage or default to 'light'
+  const getInitialTheme = () => {
+    const savedTheme = localStorage.getItem('theme');
+    return savedTheme || 'light';
+  };
+
+  const [currentTheme, setCurrentTheme] = useState(getInitialTheme());
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showThemeMenu, setShowThemeMenu] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  
   const userMenuRef = useRef(null);
-const notificationRef = useRef(null);
-useEffect(() => {
-  const handleClickOutside = (event) => {
-    if (
-      userMenuRef.current &&
-      !userMenuRef.current.contains(event.target)
-    ) {
-      setShowUserMenu(false);
-    }
+  const notificationRef = useRef(null);
+  const themeMenuRef = useRef(null);
 
-    if (
-      notificationRef.current &&
-      !notificationRef.current.contains(event.target)
-    ) {
-      setShowNotifications(false);
-    }
-  };
+  // Handle clicks outside dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+      if (themeMenuRef.current && !themeMenuRef.current.contains(event.target)) {
+        setShowThemeMenu(false);
+      }
+    };
 
-  document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
-}, []);
+  // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -59,27 +65,110 @@ useEffect(() => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-useEffect(() => {
-  const savedTheme = localStorage.getItem("theme");
 
-  if (savedTheme === "dark") {
-    document.documentElement.classList.add("dark");
-  } else {
-    document.documentElement.classList.remove("dark");
-  }
-}, []);
-const toggleTheme = () => {
-  const newTheme = !isDark;
-  setIsDark(newTheme);
+  // Apply theme on mount and when currentTheme changes
+  useEffect(() => {
+    const root = document.documentElement;
+    
+    // Remove all theme classes/attributes
+    root.classList.remove('dark');
+    root.removeAttribute('data-theme');
+    
+    // Apply the selected theme
+    if (currentTheme === 'dark') {
+      root.classList.add('dark');
+    } else if (currentTheme !== 'light') {
+      root.setAttribute('data-theme', currentTheme);
+    }
+    
+    // Save to localStorage
+    localStorage.setItem('theme', currentTheme);
+    
+    // Dispatch custom event for other components to listen
+    window.dispatchEvent(new CustomEvent('themeChange', { detail: { theme: currentTheme } }));
+  }, [currentTheme]);
 
-  if (newTheme) {
-    document.documentElement.classList.add("dark");
-    localStorage.setItem("theme", "dark");
-  } else {
-    document.documentElement.classList.remove("dark");
-    localStorage.setItem("theme", "light");
-  }
-};
+  // Theme configurations with proper colors
+  const themes = [
+    { 
+      id: 'light', 
+      name: 'Light', 
+      icon: Sun, 
+      primary: '#2563eb',
+      secondary: '#16a34a',
+      bg: '#f8fafc',
+      surface: '#ffffff',
+      text: '#0f172a'
+    },
+    { 
+      id: 'dark', 
+      name: 'Dark', 
+      icon: Moon, 
+      primary: '#3b82f6',
+      secondary: '#22c55e',
+      bg: '#0f172a',
+      surface: '#1e293b',
+      text: '#f8fafc'
+    },
+    { 
+      id: 'sunset', 
+      name: 'Sunset', 
+      icon: Palette, 
+      primary: '#f97316',
+      secondary: '#f43f5e',
+      bg: '#fff7ed',
+      surface: '#ffffff',
+      text: '#1e293b'
+    },
+    { 
+      id: 'forest', 
+      name: 'Forest', 
+      icon: Palette, 
+      primary: '#22c55e',
+      secondary: '#10b981',
+      bg: '#f0fdf4',
+      surface: '#ffffff',
+      text: '#166534'
+    },
+    { 
+      id: 'amber', 
+      name: 'Amber', 
+      icon: Palette, 
+      primary: '#f59e0b',
+      secondary: '#fbbf24',
+      bg: '#fffbeb',
+      surface: '#ffffff',
+      text: '#78350f'
+    },
+    { 
+      id: 'neon', 
+      name: 'Neon', 
+      icon: Palette, 
+      primary: '#14b8a6',
+      secondary: '#22d3ee',
+      bg: '#0f172a',
+      surface: '#1e293b',
+      text: '#e2e8f0'
+    },
+    { 
+      id: 'carbon', 
+      name: 'Carbon', 
+      icon: Palette, 
+      primary: '#4b5563',
+      secondary: '#6b7280',
+      bg: '#111827',
+      surface: '#1f2937',
+      text: '#e5e7eb'
+    }
+  ];
+
+  const setTheme = (themeId) => {
+    setCurrentTheme(themeId);
+    setShowThemeMenu(false);
+  };
+
+  // Get current theme icon
+  const CurrentThemeIcon = themes.find(t => t.id === currentTheme)?.icon || Sun;
 
   return (
     <header className={`
@@ -102,7 +191,7 @@ const toggleTheme = () => {
             </button>
 
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 hidden md:flex rounded-xl bg-gradient-to-br from-[rgb(var(--color-primary))] to-[rgb(var(--color-secondary))] flex items-center justify-center shadow-lg shadow-[rgb(var(--color-primary)_/_0.2)]">
+              <div className="w-9 h-9 hidden md:flex rounded-xl bg-gradient-to-br from-[rgb(var(--color-primary))] to-[rgb(var(--color-secondary))] items-center justify-center shadow-lg shadow-[rgb(var(--color-primary)_/_0.2)]">
                 <Command size={20} className="text-white" />
               </div>
               <div className="hidden sm:block">
@@ -114,48 +203,150 @@ const toggleTheme = () => {
             </div>
           </div>
 
-          {/* Center - Search */}
-          {/* <div className="hidden md:block flex-1 max-w-md mx-8">
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-[rgb(var(--color-primary)_/_0.1)] to-[rgb(var(--color-secondary)_/_0.1)] rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[rgb(var(--color-muted))] group-focus-within:text-[rgb(var(--color-primary))] transition-colors" />
-                <input
-                  type="text"
-                  placeholder="Search for anything..."
-                  className="w-full pl-11 pr-12 py-2.5 bg-[rgb(var(--color-bg))] border border-[rgb(var(--color-border))] rounded-2xl text-sm text-[rgb(var(--color-text))] placeholder-[rgb(var(--color-muted))] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary)_/_0.2)] focus:border-[rgb(var(--color-primary))] transition-all"
-                />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 px-2 py-1 bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-lg text-xs text-[rgb(var(--color-muted))]">
-                  <Command size={12} />
-                  <span>K</span>
-                </div>
-              </div>
-            </div>
-          </div> */}
-
           {/* Right Section */}
           <div className="flex items-center gap-2">
-            {/* Quick Actions */}
-            {/* <button className="hidden lg:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[rgb(var(--color-primary))] to-[rgb(var(--color-secondary))] hover:from-[rgb(var(--color-primary))] hover:to-[rgb(var(--color-secondary))] text-white rounded-xl transition-all duration-200 shadow-lg shadow-[rgb(var(--color-primary)_/_0.25)] hover:shadow-[rgb(var(--color-primary)_/_0.4)]">
-              <Sparkles size={18} />
-              <span className="text-sm font-medium">New</span>
-            </button> */}
-
             <button className="p-2.5 rounded-xl hover:bg-[rgb(var(--color-surface-hover))] text-[rgb(var(--color-muted))] transition-colors relative">
               <Grid size={20} />
             </button>
 
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2.5 rounded-xl hover:bg-[rgb(var(--color-surface-hover))] text-[rgb(var(--color-muted))] transition-colors"
-              aria-label="Toggle theme"
-            >
-              {isDark ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
+            {/* Theme Switcher with Color Grid */}
+            <div ref={themeMenuRef} className="relative">
+              <button
+                onClick={() => setShowThemeMenu(!showThemeMenu)}
+                className="p-2.5 rounded-xl hover:bg-[rgb(var(--color-surface-hover))] text-[rgb(var(--color-muted))] transition-colors flex items-center gap-1 relative group"
+                aria-label="Toggle theme"
+              >
+                <CurrentThemeIcon size={20} />
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-[rgb(var(--color-primary))] rounded-full animate-pulse" />
+              </button>
+
+              {/* Theme Dropdown with Color Grid */}
+              {showThemeMenu && (
+                <div className="absolute right-0 mt-2 w-80 bg-[rgb(var(--color-surface))] rounded-2xl shadow-2xl border border-[rgb(var(--color-border))] overflow-hidden animate-scaleIn z-50">
+                  {/* Header */}
+                  <div className="p-4 border-b border-[rgb(var(--color-border))] bg-gradient-to-r from-[rgb(var(--color-primary)_/_0.05)] to-[rgb(var(--color-secondary)_/_0.05)]">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-semibold text-[rgb(var(--color-text))] flex items-center gap-2">
+                          <Palette size={16} className="text-[rgb(var(--color-primary))]" />
+                          Theme Gallery
+                        </h3>
+                        <p className="text-xs text-[rgb(var(--color-muted))] mt-1">
+                          Choose your preferred style
+                        </p>
+                      </div>
+                      <div className="px-2 py-1 bg-[rgb(var(--color-primary)_/_0.1)] rounded-lg">
+                        <span className="text-[10px] font-medium text-[rgb(var(--color-primary))]">
+                          {themes.length} themes
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Color Grid - 4 per row */}
+                  <div className="p-4">
+                    <div className="grid grid-cols-4 gap-3">
+                      {themes.map((theme) => {
+                        const isActive = currentTheme === theme.id;
+                        const Icon = theme.icon;
+                        
+                        return (
+                          <button
+                            key={theme.id}
+                            onClick={() => setTheme(theme.id)}
+                            className={`
+                              group relative flex flex-col items-center gap-2 p-3 rounded-xl
+                              transition-all duration-300
+                              ${isActive 
+                                ? 'bg-[rgb(var(--color-primary)_/_0.1)] ring-2 ring-[rgb(var(--color-primary))] ring-offset-2 ring-offset-[rgb(var(--color-surface))]' 
+                                : 'hover:bg-[rgb(var(--color-surface-hover))]'
+                              }
+                            `}
+                          >
+                            {/* Color Preview */}
+                            <div className="relative w-full aspect-square rounded-lg overflow-hidden shadow-lg">
+                              {/* Color Grid Preview */}
+                              <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-0.5 p-0.5">
+                                <div style={{ backgroundColor: theme.primary }} />
+                                <div style={{ backgroundColor: theme.secondary }} />
+                                <div style={{ backgroundColor: theme.bg }} />
+                                <div style={{ backgroundColor: theme.surface }} />
+                              </div>
+                              
+                              {/* Active Indicator */}
+                              {isActive && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-[rgb(var(--color-primary))]/20 backdrop-blur-sm">
+                                  <div className="w-5 h-5 rounded-full bg-[rgb(var(--color-primary))] flex items-center justify-center shadow-lg transform scale-0 group-hover:scale-100 transition-transform duration-300">
+                                    <Check size={12} className="text-white" />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Theme Name & Icon */}
+                            <div className="flex items-center gap-1">
+                              <Icon size={10} className="text-[rgb(var(--color-muted))]" />
+                              <span className="text-[10px] font-medium text-[rgb(var(--color-text))]">
+                                {theme.name}
+                              </span>
+                            </div>
+
+                            {/* Active Dot */}
+                            {isActive && (
+                              <span className="absolute -top-1 -right-1 w-3 h-3 bg-[rgb(var(--color-primary))] rounded-full ring-2 ring-[rgb(var(--color-surface))] animate-pulse" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Preview Bar */}
+                  <div className="px-4 pb-4">
+                    <div className="p-3 rounded-xl bg-[rgb(var(--color-bg))] border border-[rgb(var(--color-border))]">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-medium text-[rgb(var(--color-muted))] uppercase tracking-wider">
+                          Current Theme
+                        </span>
+                        <span className="text-xs font-semibold text-[rgb(var(--color-text))]">
+                          {themes.find(t => t.id === currentTheme)?.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-2 rounded-full bg-[rgb(var(--color-border))] overflow-hidden">
+                          <div 
+                            className="h-full rounded-full transition-all duration-500"
+                            style={{ 
+                              width: '70%',
+                              background: `linear-gradient(90deg, ${themes.find(t => t.id === currentTheme)?.primary}, ${themes.find(t => t.id === currentTheme)?.secondary})`
+                            }}
+                          />
+                        </div>
+                        <span className="text-[8px] text-[rgb(var(--color-muted))]">
+                          Saved to localStorage
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Footer with Persistence Info */}
+                  <div className="p-3 border-t border-[rgb(var(--color-border))] bg-[rgb(var(--color-bg))]">
+                    <div className="flex items-center justify-between text-[10px]">
+                      <span className="text-[rgb(var(--color-muted))] flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                        Theme persisted
+                      </span>
+                      <span className="text-[rgb(var(--color-primary))] font-medium">
+                        Click to apply
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Notifications */}
-       <div ref={notificationRef} className="relative">
+            <div ref={notificationRef} className="relative">
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="relative p-2.5 rounded-xl hover:bg-[rgb(var(--color-surface-hover))] text-[rgb(var(--color-muted))] transition-colors"
@@ -227,7 +418,7 @@ const toggleTheme = () => {
             </div>
 
             {/* User Menu */}
-    <div ref={userMenuRef} className="relative ml-2">
+            <div ref={userMenuRef} className="relative ml-2">
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center gap-3 pl-2 pr-3 py-1.5 rounded-xl hover:bg-[rgb(var(--color-surface-hover))] transition-colors group"
@@ -248,7 +439,6 @@ const toggleTheme = () => {
               {/* User Dropdown */}
               {showUserMenu && (
                 <div className="absolute right-0 mt-6 md:mt-2 w-64 bg-[rgb(var(--color-surface))] rounded-2xl shadow-2xl border border-[rgb(var(--color-border))] overflow-hidden animate-scaleIn">
-                  {/* User Info */}
                   <div className="p-4 bg-gradient-to-r from-[rgb(var(--color-primary)_/_0.05)] to-[rgb(var(--color-secondary)_/_0.05)]">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[rgb(var(--color-primary))] to-[rgb(var(--color-secondary))] flex items-center justify-center text-white font-semibold text-xl">
@@ -261,7 +451,6 @@ const toggleTheme = () => {
                     </div>
                   </div>
 
-                  {/* Menu Items */}
                   <div className="p-2">
                     {[
                       { icon: User, label: 'My Profile', href: '/profile' },
@@ -290,10 +479,10 @@ const toggleTheme = () => {
                     })}
                   </div>
 
-                  {/* Footer */}
                   <div className="p-3 border-t border-[rgb(var(--color-border))] bg-[rgb(var(--color-bg))]">
-                    <p className="text-xs text-center text-[rgb(var(--color-muted))]">
-                      Version 2.0.1
+                    <p className="text-xs text-center text-[rgb(var(--color-muted))] flex items-center justify-center gap-1">
+                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                      Theme: {themes.find(t => t.id === currentTheme)?.name} • v2.0
                     </p>
                   </div>
                 </div>
@@ -303,31 +492,19 @@ const toggleTheme = () => {
         </div>
       </div>
 
-      {/* Mobile Search Bar */}
-      <div className="hidden px-4 pb-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[rgb(var(--color-muted))]" />
-          <input
-            type="text"
-            placeholder="Search..."
-            className="w-full pl-9 pr-4 py-2 bg-[rgb(var(--color-bg))] border border-[rgb(var(--color-border))] rounded-xl text-sm text-[rgb(var(--color-text))] placeholder-[rgb(var(--color-muted))] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary)_/_0.2)] focus:border-[rgb(var(--color-primary))] transition-all"
-          />
-        </div>
-      </div>
-
       <style>{`
         @keyframes scaleIn {
           from {
             opacity: 0;
-            transform: scale(0.95);
+            transform: scale(0.95) translateY(-10px);
           }
           to {
             opacity: 1;
-            transform: scale(1);
+            transform: scale(1) translateY(0);
           }
         }
         .animate-scaleIn {
-          animation: scaleIn 0.2s ease-out forwards;
+          animation: scaleIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
       `}</style>
     </header>

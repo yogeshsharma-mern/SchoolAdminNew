@@ -3,14 +3,16 @@ import { router } from "./app/router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
 
+
 export default function App() {
   const queryClient = new QueryClient();
-  <Toaster />
+  // <Toaster />
 
   return (
     <div>
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
+         <Toaster position="top-right" reverseOrder={false} />
       </QueryClientProvider>
     </div>
   )

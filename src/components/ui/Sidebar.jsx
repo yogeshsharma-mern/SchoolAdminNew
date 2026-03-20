@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import {  useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import {
   toggleSidebarCollapse
 } from '../../redux/features/ui/uislice';
-import {logout} from "../../redux/features/auth/authslice";
+import { logout } from "../../redux/features/auth/authslice";
 import { Link } from 'react-router-dom';
+import {setSidebarCollapse}  from "../../redux/features/ui/uislice";
 
 import {
   // Dashboard
@@ -60,27 +61,56 @@ import {
 } from 'lucide-react';
 
 const TailwindSidebar = () => {
-    const location = useLocation();
+  const location = useLocation();
   const dispatch = useDispatch();
   const { sidebarCollapsed } = useSelector((state) => state.ui);
-  
-  const [activeItem, setActiveItem] = useState('dashboard');
+
   const [expandedMenus, setExpandedMenus] = useState({
     teachers: false,
     schoolSetting: true,
     appearance: false,
   });
 
+  // Check if mobile view
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
   // Auto-collapse on smaller screens
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 1024) return;
-      dispatch(toggleSidebarCollapse(true));
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (mobile) {
+        dispatch(toggleSidebarCollapse());
+        dispatch(setSidebarCollapse(true));
+      }
     };
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [dispatch]);
+  useEffect(() => {
+  const handleResize = () => {
+    const isMobile = window.innerWidth < 1024;
+
+    if (isMobile) {
+      dispatch(setSidebarCollapse(true)); // 📱 hide
+    } else {
+      dispatch(setSidebarCollapse(false)); // 💻 show
+    }
+  };
+
+  handleResize(); // ✅ run on mount
+
+  window.addEventListener("resize", handleResize);
+  return () => window.removeEventListener("resize", handleResize);
+}, [dispatch]);
+
+  // Function to close sidebar on mobile when clicking a link
+  const handleLinkClick = () => {
+    if (isMobile) {
+      dispatch(setSidebarCollapse(true));
+    }
+  };
 
   const toggleSubMenu = (menu) => {
     setExpandedMenus(prev => ({
@@ -89,48 +119,64 @@ const TailwindSidebar = () => {
     }));
   };
 
+  // Auto-expand submenu if child is active
+  useEffect(() => {
+    const newExpandedMenus = {};
+
+    navSections.forEach(section => {
+      section.items.forEach(item => {
+        if (item.hasSubmenu) {
+          const isChildActive = item.submenu.some(
+            sub => location.pathname === sub.href
+          );
+
+          if (isChildActive) {
+            newExpandedMenus[item.id] = true;
+          }
+        }
+      });
+    });
+
+    setExpandedMenus(prev => ({
+      ...prev,
+      ...newExpandedMenus
+    }));
+  }, [location.pathname]);
+
   // Your original routes structure preserved
   const navSections = [
     {
       title: 'MAIN',
       items: [
-        { 
-          id: 'dashboard', 
-          label: 'Dashboard', 
-          icon: LayoutDashboard, 
+        {
+          id: 'dashboard',
+          label: 'Dashboard',
+          icon: LayoutDashboard,
           href: '/admin/dashboard',
-        //   badge: { text: 'NEW', color: 'bg-green-500' }
         },
-        { 
-          id: 'analytics', 
-          label: 'Analytics', 
-          icon: LineChart, 
-          href: '/admin/analytics',
-        },
-        { 
-          id: 'subjects', 
-          label: 'Subjects', 
-          icon: BookOpen, 
-          href: '/admin/subjects',
-        },
-        { 
-          id: 'assign', 
-          label: 'Assignments', 
-          icon: ClipboardList, 
-          href: '/admin/assign',
+        {
+          id: 'class',
+          label: 'Classes',
+          icon: ClipboardList,
+          href: '/admin/Classes',
           notification: true
+        },
+        {
+          id: 'subjects',
+          label: 'Subjects',
+          icon: BookOpen,
+          href: '/admin/subjects',
         },
       ]
     },
     {
       title: 'ACADEMIC',
       items: [
-        { 
-          id: 'students', 
-          label: 'Students', 
-          icon: Users, 
+        {
+          id: 'students',
+          label: 'Students',
+          icon: Users,
           href: '/admin/students',
-        //   badge: { text: '2.45k', color: 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400' }
         },
         {
           id: 'teachers',
@@ -138,24 +184,22 @@ const TailwindSidebar = () => {
           icon: Users2,
           hasSubmenu: true,
           submenu: [
-            { id: 'all-teachers', label: 'All Teachers', icon: Users2, href: '/admin/teachers/all', count: 48 },
-            { id: 'attendance', label: 'Attendance', icon: CalendarCheck, href: '/admin/teachers/attendance', count: '92%' },
-            { id: 'salary', label: 'Salary', icon: Wallet, href: '/admin/teachers/salary', count: '$45k' },
-            { id: 'performance', label: 'Performance', icon: TrendingUp, href: '/admin/teachers/performance', badge: 'New' },
+            {
+              id: 'all-teachers', label: 'All Teachers', icon: Users2, href: '/admin/teachers/all',
+            },
+            {
+              id: 'attendance', label: 'Attendance', icon: CalendarCheck, href: '/admin/teachers/attendance',
+            },
+            {
+              id: 'salary', label: 'Salary', icon: Wallet, href: '/admin/teachers/salary',
+            },
           ]
         },
-        { 
-          id: 'fees', 
-          label: 'Fees Management', 
-          icon: DollarSign, 
+        {
+          id: 'fees',
+          label: 'Fees Management',
+          icon: DollarSign,
           href: '/admin/fees',
-        //   badge: { text: 'Due', color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400' }
-        },
-        { 
-          id: 'results', 
-          label: 'Results', 
-          icon: Award, 
-          href: '/admin/results',
         },
       ]
     },
@@ -168,10 +212,11 @@ const TailwindSidebar = () => {
           icon: School,
           hasSubmenu: true,
           submenu: [
-            { id: 'general', label: 'General', icon: Settings, href: '/admin/settings/general' },
+            { id: 'school-setting', label: 'School Setting', icon: Calendar, href: '/admin/settings/school-setting' },
             { id: 'academic-year', label: 'Academic Year', icon: Calendar, href: '/admin/settings/academic-year' },
-            { id: 'gallery', label: 'Gallery', icon: Image, href: '/admin/settings/gallery', 
-                // count: 24 
+
+            {
+              id: 'gallery', label: 'Gallery', icon: Image, href: '/admin/settings/gallery',
             },
             { id: 'about-us', label: 'About Us', icon: Info, href: '/admin/settings/about' },
             { id: 'leadership', label: 'Leadership', icon: Users2, href: '/admin/settings/leadership', count: 8 },
@@ -190,24 +235,11 @@ const TailwindSidebar = () => {
             { id: 'layout', label: 'Layout', icon: Layers, href: '/admin/settings/appearance/layout' },
           ]
         },
-        { 
-          id: 'security', 
-          label: 'Security', 
-          icon: Shield, 
-          href: '/admin/security',
-        },
-        { 
-          id: 'change-password', 
-          label: 'Change Password', 
-          icon: Key, 
-          href: '/admin/change-password' 
-        },
-        { 
-          id: 'api', 
-          label: 'API & Integrations', 
-          icon: Network, 
-          href: '/admin/api',
-          badge: { text: 'New', color: 'bg-green-500 text-white' }
+        {
+          id: 'change-password',
+          label: 'Change Password',
+          icon: Key,
+          href: '/admin/change-password'
         },
       ]
     }
@@ -219,27 +251,27 @@ const TailwindSidebar = () => {
     return (
       <div className="mt-1 space-y-0.5 overflow-hidden animate-slideDown">
         {submenu.map((item) => {
-       const isActive = location.pathname === item.href;
+          const isActive = location.pathname === item.href;
           const Icon = item.icon;
 
           return (
             <Link
               key={item.id}
               to={item.href}
-   onClick={() => {}}
+              onClick={handleLinkClick} // Added click handler for submenu items
               className={`
                 relative flex items-center gap-3 px-3 py-2 rounded-lg
                 transition-all duration-200 group
                 ${sidebarCollapsed ? 'justify-center' : ''}
-                ${isActive 
-                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
+                ${isActive
+                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
                   : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
                 }
               `}
               style={{ paddingLeft: level === 0 ? '2.75rem' : '3.75rem' }}
             >
               <Icon size={16} className="shrink-0" />
-              
+
               {!sidebarCollapsed && (
                 <>
                   <span className="flex-1 text-sm whitespace-nowrap">{item.label}</span>
@@ -271,15 +303,15 @@ const TailwindSidebar = () => {
   return (
     <>
       {/* Mobile Overlay */}
-      {!sidebarCollapsed && (
-        <div 
+      {!sidebarCollapsed && isMobile && (
+        <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => dispatch(toggleSidebarCollapse())}
+          onClick={() => dispatch(setSidebarCollapse(true))}
         />
       )}
 
       {/* Sidebar */}
-      <aside 
+      <aside
         className={`
           fixed lg:static top-0 left-0 z-50 h-screen
           bg-white dark:bg-gray-900
@@ -304,7 +336,7 @@ const TailwindSidebar = () => {
               <span className="text-xl font-bold text-blue-600">E</span>
             </div>
           )}
-          
+
           {/* Collapse Button */}
           <button
             onClick={() => dispatch(toggleSidebarCollapse())}
@@ -318,9 +350,9 @@ const TailwindSidebar = () => {
         <div className="p-4 border-b border-gray-200 dark:border-gray-800">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 overflow-hidden">
-              <img 
-                src="https://ui-avatars.com/api/?name=Admin+User&background=2563eb&color=fff" 
-                alt="User" 
+              <img
+                src="https://ui-avatars.com/api/?name=Admin+User&background=2563eb&color=fff"
+                alt="User"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -348,62 +380,75 @@ const TailwindSidebar = () => {
               <div className="space-y-1">
                 {section.items.map((item) => {
                   const Icon = item.icon;
-                  const isActive = activeItem === item.id;
+                  const isActive = location.pathname === item.href;
                   const hasSubmenu = item.hasSubmenu;
                   const isExpanded = expandedMenus[item.id];
 
                   return (
                     <div key={item.id}>
                       {/* Main Item */}
-                   {/* Main Item */}
-{!hasSubmenu ? (
-  <Link
-    to={item.href}
-    onClick={() => setActiveItem(item.id)}
-    className={`
-      relative flex items-center gap-3 px-3 py-2 rounded-lg
-      transition-all duration-200
-      ${sidebarCollapsed ? 'justify-center' : ''}
-      ${isActive
-        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-      }
-      group
-    `}
-  >
-    <Icon size={20} />
+                      {!hasSubmenu ? (
+                        <Link
+                          to={item.href}
+                          onClick={handleLinkClick} // Added click handler for main menu items
+                          className={`
+                            relative flex items-center gap-3 px-3 py-2 rounded-lg
+                            transition-all duration-200
+                            ${sidebarCollapsed ? 'justify-center' : ''}
+                            ${isActive
+                              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                            }
+                            group
+                          `}
+                        >
+                          <Icon size={20} />
 
-    {!sidebarCollapsed && (
-      <span className="flex-1 text-sm">{item.label}</span>
-    )}
-  </Link>
-) : (
-  <div
-    onClick={() => toggleSubMenu(item.id)}
-    className={`
-      relative flex items-center gap-3 px-3 py-2 rounded-lg
-      cursor-pointer
-      ${sidebarCollapsed ? 'justify-center' : ''}
-      ${isExpanded
-        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-      }
-      group
-    `}
-  >
-    <Icon size={20} />
+                          {!sidebarCollapsed && (
+                            <span className="flex-1 text-sm">{item.label}</span>
+                          )}
 
-    {!sidebarCollapsed && (
-      <>
-        <span className="flex-1 text-sm">{item.label}</span>
-        <ChevronDown
-          size={16}
-          className={`transition-transform ${isExpanded ? "rotate-180" : ""}`}
-        />
-      </>
-    )}
-  </div>
-)}
+                          {/* Tooltip for collapsed mode */}
+                          {sidebarCollapsed && (
+                            <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50">
+                              {item.label}
+                            </div>
+                          )}
+                        </Link>
+                      ) : (
+                        <div
+                          onClick={() => toggleSubMenu(item.id)}
+                          className={`
+                            relative flex items-center gap-3 px-3 py-2 rounded-lg
+                            cursor-pointer
+                            ${sidebarCollapsed ? 'justify-center' : ''}
+                            ${isExpanded
+                              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                            }
+                            group
+                          `}
+                        >
+                          <Icon size={20} />
+
+                          {!sidebarCollapsed && (
+                            <>
+                              <span className="flex-1 text-sm">{item.label}</span>
+                              <ChevronDown
+                                size={16}
+                                className={`transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                              />
+                            </>
+                          )}
+
+                          {/* Tooltip for collapsed mode */}
+                          {sidebarCollapsed && (
+                            <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50">
+                              {item.label}
+                            </div>
+                          )}
+                        </div>
+                      )}
 
                       {/* Submenu */}
                       {hasSubmenu && renderSubmenu(item.id, item.submenu)}
@@ -420,12 +465,13 @@ const TailwindSidebar = () => {
           {/* Settings */}
           <Link
             to="/admin/settings"
+            onClick={handleLinkClick} // Added click handler for Settings
             className={`
               flex items-center gap-3 px-3 py-2 rounded-lg mb-1
               transition-all duration-200
               ${sidebarCollapsed ? 'justify-center' : ''}
               text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white
-              group
+              group relative
             `}
           >
             <Settings size={20} />
@@ -438,30 +484,35 @@ const TailwindSidebar = () => {
           </Link>
 
           {/* Logout */}
-         <button 
-  onClick={() => dispatch(logout())}
-  className={`
-    flex items-center w-full gap-3 px-3 py-2 rounded-lg
-    transition-all duration-200
-    ${sidebarCollapsed ? 'justify-center' : ''}
-    text-gray-700 dark:text-gray-300 
-    hover:bg-red-50 dark:hover:bg-red-900/20 
-    hover:text-red-600 dark:hover:text-red-400
-    group relative
-  `}
->
-  <LogOut size={20} />
+          <button
+            onClick={() => {
+              dispatch(logout());
+              if (isMobile) {
+                dispatch(toggleSidebarCollapse(true));
+              }
+            }}
+            className={`
+              flex items-center w-full gap-3 px-3 py-2 rounded-lg
+              transition-all duration-200
+              ${sidebarCollapsed ? 'justify-center' : ''}
+              text-gray-700 dark:text-gray-300 
+              hover:bg-red-50 dark:hover:bg-red-900/20 
+              hover:text-red-600 dark:hover:text-red-400
+              group relative
+            `}
+          >
+            <LogOut size={20} />
 
-  {!sidebarCollapsed && (
-    <span className="text-sm">Logout</span>
-  )}
+            {!sidebarCollapsed && (
+              <span className="text-sm">Logout</span>
+            )}
 
-  {sidebarCollapsed && (
-    <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible">
-      Logout
-    </div>
-  )}
-</button>
+            {sidebarCollapsed && (
+              <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible">
+                Logout
+              </div>
+            )}
+          </button>
         </div>
       </aside>
 

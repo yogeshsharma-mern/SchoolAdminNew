@@ -15,6 +15,7 @@ const authSlice = createSlice({
       state.admin = action.payload.admin;
       state.token = action.payload.token;
       localStorage.setItem("token", action.payload.token);
+      localStorage.setItem("schoolId",action.payload.schoolId)
       // localStorage.setItem("user",JSON.stringify(action.payload.user));
     },
     logout: (state) => {

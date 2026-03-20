@@ -24,11 +24,12 @@ export default function Colors() {
     document.documentElement.setAttribute("data-theme", savedTheme);
   }
 }, []);
-  const applyTheme = (theme) => {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("theme", theme);
-  };
+const applyTheme = (theme) => {
+  document.documentElement.setAttribute("data-theme", theme);
+  localStorage.setItem("theme", theme);
 
+  window.location.reload();
+};
   return (
     <div className="p-6">
       <h2

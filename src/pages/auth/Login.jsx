@@ -1,63 +1,82 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Lock, LogIn, Moon, Sun, School, BookOpen, Users, TrendingUp } from 'lucide-react';
+import { Mail, Lock, LogIn, Moon, Sun, Eye, EyeOff, School, BookOpen, Users, TrendingUp } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import apiPath from '../../api/apiPath';
 import { loginSuccess } from '../../redux/features/auth/authslice';
+import { useDispatch } from 'react-redux';
 import toast from 'react-hot-toast';
 import { apiPost } from '../../api/apiFetch';
+import { useNavigate } from 'react-router-dom';
 
 const AdminLogin = () => {
-  const [isDark, setIsDark] = useState(false);
+const dispatcher = useDispatch();
+const navigate = useNavigate();
+  // const [isDark, setIsDark] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
-
+const getTheme = () => localStorage.getItem("theme") || "light";
+const [isDark, setIsDark] = useState(getTheme() === "dark");
   // Toggle theme and apply dark class to html element
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-    if (!isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  };
+const toggleTheme = () => {
+  const newTheme = isDark ? "light" : "dark";
+
+  setIsDark(!isDark);
+  localStorage.setItem("theme", newTheme);
+
+  if (newTheme === "dark") {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
+};
 const loginMutation = useMutation({
-  mutationFn: async ({ email, password }) => {
-    return await apiPost(apiPath.adminLogin, { email, password });
-  },
+  mutationFn: ({ email, password }) =>
+    apiPost(apiPath.adminLogin, { email, password }),
 
   onSuccess: (data) => {
-    console.log("data", data.data);
+    // if (!data?.success) {
+    //   toast.error(data?.message || "Login failed");
+    //   return;
+    // }
 
-    dispatch(
+    dispatcher(
       loginSuccess({
-        admin: data?.data?.admin,
-        token: data?.data?.token
+        admin: data?.data?.role,
+        token: data?.data?.accessToken,
+        schoolId:data?.data?._id
       })
     );
 
-    toast.success(data?.message || "Login successful");
-    navigate("/hr/dashboard");
+    toast.success("Login successful");
+    navigate("/admin/dashboard");
   },
 
   onError: (error) => {
     toast.error(
-      error?.response?.data?.message ||
-      "Login failed. Please check your credentials."
+      error?.response?.data?.message 
     );
   }
 });
+useEffect(() => {
+  const savedTheme = localStorage.getItem("theme") || "light";
+
+  if (savedTheme === "dark") {
+    document.documentElement.classList.add("dark");
+    setIsDark(true);
+  } else {
+    document.documentElement.classList.remove("dark");
+    setIsDark(false);
+  }
+}, []);
   // Check for system preference on mount
-  useEffect(() => {
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setIsDark(true);
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+  e.preventDefault();
+
+  if (loginMutation.isPending) return;
     // setIsLoading(true);
       loginMutation.mutate({email,password});
     // Simulate API call
@@ -211,40 +230,46 @@ const loginMutation = useMutation({
               </div>
 
               {/* Password Field */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-[rgb(var(--color-muted))]">
-                  Password
-                </label>
-                <div className={`
-                  relative group transition-all duration-300
-                  ${focusedField === 'password' ? 'scale-105' : ''}
-                `}>
-                  <Lock className={`
-                    absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-all duration-300
-                    ${focusedField === 'password' 
-                      ? 'text-[rgb(var(--color-primary))]' 
-                      : 'text-[rgb(var(--color-muted))] group-hover:text-[rgb(var(--color-primary))]'
-                    }
-                  `} />
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onFocus={() => setFocusedField('password')}
-                    onBlur={() => setFocusedField(null)}
-                    required
-                    className="w-full pl-10 pr-4 py-3 bg-[rgb(var(--color-bg))] border border-[rgb(var(--color-border))] rounded-lg text-[rgb(var(--color-text))] placeholder-[rgb(var(--color-muted))] outline-none focus:border-[rgb(var(--color-primary))] focus:ring-2 focus:ring-[rgb(var(--color-primary)_/_0.2)] transition-all duration-300"
-                    placeholder="••••••••"
-                  />
-                  <div className={`
-                    absolute inset-0 rounded-lg pointer-events-none transition-opacity duration-500
-                    ${focusedField === 'password' 
-                      ? 'opacity-100 shadow-[0_0_0_3px_rgb(var(--color-primary)_/_0.2)]' 
-                      : 'opacity-0'
-                    }
-                  `} />
-                </div>
-              </div>
+<div className="space-y-2">
+  <label className="block text-sm font-medium text-[rgb(var(--color-muted))]">
+    Password
+  </label>
+
+  <div className={`
+    relative group transition-all duration-300
+    ${focusedField === 'password' ? 'scale-105' : ''}
+  `}>
+    
+    <Lock className={`
+      absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-all duration-300
+      ${focusedField === 'password'
+        ? 'text-[rgb(var(--color-primary))]'
+        : 'text-[rgb(var(--color-muted))] group-hover:text-[rgb(var(--color-primary))]'
+      }
+    `} />
+
+    <input
+      type={showPassword ? "text" : "password"}
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      onFocus={() => setFocusedField('password')}
+      onBlur={() => setFocusedField(null)}
+      required
+      className="w-full pl-10 pr-12 py-3 bg-[rgb(var(--color-bg))] border border-[rgb(var(--color-border))] rounded-lg text-[rgb(var(--color-text))] placeholder-[rgb(var(--color-muted))] outline-none focus:border-[rgb(var(--color-primary))] focus:ring-2 focus:ring-[rgb(var(--color-primary)_/_0.2)] transition-all duration-300"
+      placeholder="••••••••"
+    />
+
+    {/* Toggle Password */}
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-[rgb(var(--color-muted))] hover:text-[rgb(var(--color-primary))]"
+    >
+      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+    </button>
+
+  </div>
+</div>
 
               {/* Remember me & Forgot password */}
               <div className="flex items-center justify-between text-sm">
@@ -265,7 +290,7 @@ const loginMutation = useMutation({
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isLoading}
+          disabled={loginMutation.isPending}
                 className={`
                   w-full py-3 px-4 rounded-lg font-semibold text-white
                   bg-gradient-to-r from-[rgb(var(--color-primary))] to-[rgb(var(--color-secondary))]
@@ -276,7 +301,7 @@ const loginMutation = useMutation({
                 `}
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
-                  {isLoading ? (
+                  {loginMutation.isPending  ? (
                     <>
                       <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
