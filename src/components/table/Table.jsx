@@ -3,7 +3,7 @@ import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
-  getFilteredRowModel,
+//   getFilteredRowModel,
   getPaginationRowModel,
   flexRender,
 } from "@tanstack/react-table";
@@ -200,7 +200,7 @@ export default function ReusableTable({
     onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
+    // getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
 

@@ -10,7 +10,8 @@ const apiPath = Object.freeze({
   getSchoolSettings: "/v1/admin/school-setting",
   getClasses: "/v1/admin/class/get/all",
   createClass: "/v1/admin/class/reg",
-  updateClass: "/v1/admin/class"
+  updateClass: "/v1/admin/class",
+  deleteClass:"/v1/admin/class/delete-class"
 
 
 

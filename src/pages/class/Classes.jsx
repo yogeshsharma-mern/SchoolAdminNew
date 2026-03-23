@@ -7,6 +7,9 @@ import { Pencil, Trash2, Plus, X, AlertCircle } from 'lucide-react';
 import Modal from '../../components/ui/Modal';
 import Select from "react-select";
 import toast from 'react-hot-toast';
+import ConfirmBox from '../../components/ui/ConfirmBox';
+import useDebounce from '../../hooks/useDebounce';
+import { useSelector } from 'react-redux';
 
 export default function Classes() {
   const queryClient = useQueryClient();
@@ -16,23 +19,51 @@ export default function Classes() {
     pageIndex: 0,
     pageSize: 10
   });
+  const collapsed = useSelector((state) => state.ui.sidebarCollapsed);
   const [sortingState, setSortingState] = useState([]);
+  const [selectedAcademicYear, setSelectedAcademicYear] = useState("");
   const [globalFilter, setGlobalFilter] = useState("");
   const [columnFilters, setColumnFilters] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [formErrors, setFormErrors] = useState({});
+  const [confirmDelete,setConfirmDelete] = useState(false);
+  const [selectedDeleteClass,setSelectedDeleteClass] = useState("");
+  console.log("selectedDeleteClass",selectedDeleteClass);
   const [formData, setFormData] = useState({
     name: '',
     streams: '',
     academicSessionId: ''
   });
+  const debouncedSearch = useDebounce(globalFilter);
 
   // Fetch classes data
-  const { data: classesData, isLoading, isError, error } = useQuery({
-    queryKey: ["classes"],
-    queryFn: () => apiGet(apiPath.getClasses),
-  });
+//   const { data: classesData, isLoading, isError, error } = useQuery({
+//   queryKey: ["classes", debouncedSearch],
+// queryFn: () => apiGet(`${apiPath.getClasses}?search=${debouncedSearch}`)
+//   });
+const { data: classesData ,isLoading, isError, error } = useQuery({
+  queryKey: ["classes", globalFilter, selectedAcademicYear],
+  queryFn: () => {
+    let url = apiPath.getClasses;
+
+    const params = [];
+
+    if (globalFilter) {
+      params.push(`search=${globalFilter}`);
+    }
+
+    if (selectedAcademicYear) {
+      params.push(`academicSessionId=${selectedAcademicYear}`);
+    }
+
+    if (params.length > 0) {
+      url += `?${params.join("&")}`;
+    }
+
+    return apiGet(url);
+  },
+});
 
   const {data:academicSessions} = useQuery({
     queryKey:["academicYears"],
@@ -81,9 +112,16 @@ toast.success(res?.message);
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: (id) => apiDelete(`${apiPath.deleteClass}/${id}`),
-    onSuccess: () => {
+    onSuccess: (res) => {
+      console.log("res",res);
+      toast.success(res?.message);
       queryClient.invalidateQueries({ queryKey: ["classes"] });
+      setConfirmDelete(false);
+      
     },
+        onError: (error) => {
+      toast.error(error?.response?.data?.message);
+    }
   });
 
   // Transform API data for table display
@@ -91,7 +129,7 @@ toast.success(res?.message);
     if (!classesData?.data) return [];
     
     const flatData = [];
-    
+    console.log("flatdata",flatData);
     classesData.data.forEach((classItem) => {
       if (classItem.sections && classItem.sections.length > 0) {
         classItem.sections.forEach((section) => {
@@ -106,7 +144,8 @@ toast.success(res?.message);
             classId: classItem._id,
             sectionId: section._id,
             originalClass: classItem,
-            originalSection: section
+            originalSection: section,
+              academicSessionId: classItem.academicSessionId
           });
         });
       } else {
@@ -121,7 +160,8 @@ toast.success(res?.message);
           classId: classItem._id,
           sectionId: null,
           originalClass: classItem,
-          originalSection: null
+          originalSection: null,
+            academicSessionId: classItem.academicSessionId
         });
       }
     });
@@ -129,11 +169,12 @@ toast.success(res?.message);
     return flatData;
   }, [classesData]);
 
+
   const resetForm = () => {
     setFormData({
       name: '',
       streams: '',
-      academicSessionId: '69b51a1b0a14d3e9216a1285'
+      academicSessionId: ''
     });
     setFormErrors({});
     setEditingItem(null);
@@ -144,25 +185,28 @@ toast.success(res?.message);
     setShowModal(true);
   };
 
-  const handleEdit = (item) => {
-    setEditingItem(item);
-    setFormData({
-      name: item.className,
-      streams: item.stream !== '-' ? item.stream : '',
-      academicSessionId: '69b51a1b0a14d3e9216a1285'
-    });
-    setFormErrors({});
-    setShowModal(true);
-  };
+const handleEdit = (item) => {
+  setEditingItem(item);
+  setFormData({
+    name: item.className,
+    streams: item.stream !== '-' ? item.stream : '',
+    academicSessionId: item.academicSessionId || ""
+  });
+  setFormErrors({});
+  setShowModal(true);
+};
 
   const handleDelete = async (item) => {
-    if (window.confirm(`Are you sure you want to delete ${item.className}${item.sectionName !== '-' ? ` - ${item.sectionName}` : ''}?`)) {
-      if (item.sectionId) {
-        await deleteMutation.mutateAsync(item.sectionId);
-      } else {
-        await deleteMutation.mutateAsync(item.classId);
-      }
-    }
+    // if (window.confirm(`Are you sure you want to delete ${item.className}${item.sectionName !== '-' ? ` - ${item.sectionName}` : ''}?`)) {
+    //   if (item.sectionId) {
+    //     await deleteMutation.mutateAsync(item.sectionId);
+    //   } else {
+    //     await deleteMutation.mutateAsync(item.classId);
+    //   }
+    // }
+    // console.log("item",item);
+setConfirmDelete(true);
+setSelectedDeleteClass(item);
   };
 
   const validateForm = () => {
@@ -479,7 +523,7 @@ const customSelectStyles = {
   }, [transformedData]);
 
   return (
-    <div className="min-h-screen p-6" style={{
+    <div className="min-h-screen p-4 md:p-6" style={{
       backgroundColor: 'rgba(var(--color-bg), 1)'
     }}>
       <div className="max-w-7xl mx-auto">
@@ -496,7 +540,8 @@ const customSelectStyles = {
             </div>
             
             {/* Add Button */}
-            <button
+<div className='flex gap-3'>
+              <button
               onClick={handleAdd}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all duration-200 hover:shadow-lg hover:scale-105"
               style={{
@@ -508,6 +553,17 @@ const customSelectStyles = {
               <Plus size={18} />
               Add New Class
             </button>
+            <Select
+  options={academicYearOptions}
+  value={academicYearOptions?.find(
+    (opt) => opt.value === selectedAcademicYear
+  )}
+  onChange={(selected) => {
+    setSelectedAcademicYear(selected?.value || "");
+  }}
+  placeholder="Filter by academic year"
+/>
+</div>
           </div>
         </div>
 
@@ -566,6 +622,10 @@ const customSelectStyles = {
         </div>
 
         {/* Table Component */}
+      <div className={`
+  overflow-x-auto transition-all duration-300 w-[90vw]
+  ${collapsed ? "md:w-[90vw]" : "md:w-[73vw]"}
+`}>
         <ReusableTable
           columns={columns}
           data={paginatedData}
@@ -584,6 +644,7 @@ const customSelectStyles = {
           fetching={isLoading}
           loading={isLoading}
         />
+        </div>
 
         {/* Modern Modal for Add/Edit */}
         <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
@@ -798,6 +859,7 @@ const customSelectStyles = {
             </form>
           </div>
         </Modal>
+        <ConfirmBox isOpen={confirmDelete} message='You want to delete this class' onCancel={()=>setConfirmDelete(false)} onConfirm={()=>deleteMutation.mutateAsync(selectedDeleteClass?.originalClass?._id)}/>
       </div>
     </div>
   );
