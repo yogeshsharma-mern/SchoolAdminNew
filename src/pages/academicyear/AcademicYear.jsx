@@ -15,7 +15,7 @@ export default function AcademicYear() {
         academicSession: '',
         startDate: '',
         endDate: '',
-        status: 'inactive'
+        status: 'active'
     });
 
     // Generate academic years (current year and previous 4 years)

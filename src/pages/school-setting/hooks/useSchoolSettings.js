@@ -2,12 +2,12 @@
 import { useState } from "react";
 import { Country, State, City } from "country-state-city";
 import apiPath from "../../../api/apiPath";
-import { apiGet, apiPost, apiPatch,apiPut } from "../../../api/apiFetch";
+import { apiGet, apiPost, apiPatch, apiPut } from "../../../api/apiFetch";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useMutation } from "@tanstack/react-query";
- import { useQueryClient } from "@tanstack/react-query";
- import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 
 
@@ -71,6 +71,10 @@ export const useSchoolSettings = () => {
     const [academicYearFilter, setAcademicYearFilter] = useState(null);
     const [cordinateModalOpen, setCordinateModalOpen] = useState(false);
     const [urlErrors, setUrlErrors] = useState([]);
+    const SchoolId = localStorage.getItem("schoolId");
+    const [schoolSettingId,setschoolSetttingId] = useState("");
+    console.log("schoolSettingId",schoolSettingId);
+
     const [locationData, setLocationData] = useState({
         latitude: "",
         longitude: "",
@@ -92,37 +96,37 @@ export const useSchoolSettings = () => {
         queryFn: () => apiGet(apiPath.getAcademicSessions)
     });
 
-const queryClient = useQueryClient();
-const activeSession = academicSessions?.results?.find(
-  (s) => s.status === "active"
-);
+    const queryClient = useQueryClient();
+    const activeSession = academicSessions?.results?.find(
+        (s) => s.status === "active"
+    );
 
-// 🔥 THIS IS KEY
-const selectedSessionId =
-  academicYearFilter || activeSession?._id;
-  console.log("selectedSessionId",selectedSessionId);
-const { data: schoolSettingsData, isLoading } = useQuery({
-  queryKey: ["school-settings", selectedSessionId],
-  queryFn: () =>
-    apiGet(`${apiPath.getSchoolSettings}/${selectedSessionId}`),
-  enabled: !!selectedSessionId,
-});
+    // 🔥 THIS IS KEY
+    const selectedSessionId =
+        academicYearFilter || activeSession?._id;
+    console.log("selectedSessionId", selectedSessionId);
+    const { data: schoolSettingsData, isLoading } = useQuery({
+        queryKey: ["school-settings", selectedSessionId],
+        queryFn: () =>
+            apiGet(`${apiPath.getSchoolSettings}/${selectedSessionId}`),
+        enabled: !!selectedSessionId,
+    });
 
-console.log("schoolsettingdata",schoolSettingsData);
+    // console.log("schoolsettingdata", schoolSettingsData?.results?._id);
     const mutation = useMutation({
-mutationFn: (formData) => {
-  if (schoolSettingsData?.results?._id) {
-    return apiPut(
-      `${apiPath.updateSchoolSettings}/${selectedSessionId}`,
-      formData
-    );
-  } else {
-    return apiPost(
-      `${apiPath.createSchoolSettings}/${selectedSessionId}`,
-      formData
-    );
-  }
-},
+        mutationFn: (formData) => {
+            if (schoolSettingsData?.results?._id) {
+                return apiPut(
+                    `${apiPath.updateSchoolSettings}/${schoolSettingsData?.results?._id}`,
+                    formData
+                );
+            } else {
+                return apiPost(
+                    `${apiPath.createSchoolSettings}`,
+                    formData
+                );
+            }
+        },
         onSuccess: (data) => {
             queryClient.invalidateQueries(["school-settings"]);
             toast.success(data.message || "Settings saved successfully");
@@ -138,43 +142,43 @@ mutationFn: (formData) => {
             toast.success(data.message || "Settings reset to defaults");
         },
     });
-      const saveLocationMutation = useMutation({
+    const saveLocationMutation = useMutation({
         mutationFn: async () => {
-          if (!schoolId) throw new Error("SchoolId missing");
-    
-          // Validate coordinates
-          const lat = Number(locationData.latitude);
-          const lng = Number(locationData.longitude);
-    
-          if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-            throw new Error("Invalid coordinates");
-          }
-    
-          const payload = {
-            latitude: lat,
-            longitude: lng,
-            radiusMeters: Number(locationData.radiusMeters),
-          };
-    
-          // 🔹 Decide POST vs PUT
-          if (!cordinatesData?.results) {
-            return apiPost(apiPath.addSchoolLocation, {
-              schoolId,
-              ...payload,
-            });
-          } else {
-            return apiPut(`${apiPath.updateSchoolLocation}/${schoolId}/location`, payload);
-          }
+            if (!schoolId) throw new Error("SchoolId missing");
+
+            // Validate coordinates
+            const lat = Number(locationData.latitude);
+            const lng = Number(locationData.longitude);
+
+            if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+                throw new Error("Invalid coordinates");
+            }
+
+            const payload = {
+                latitude: lat,
+                longitude: lng,
+                radiusMeters: Number(locationData.radiusMeters),
+            };
+
+            // 🔹 Decide POST vs PUT
+            if (!cordinatesData?.results) {
+                return apiPost(apiPath.addSchoolLocation, {
+                    schoolId,
+                    ...payload,
+                });
+            } else {
+                return apiPut(`${apiPath.updateSchoolLocation}/${schoolId}/location`, payload);
+            }
         },
         onSuccess: () => {
-          toast.success("Location saved successfully ✅");
-          queryClient.invalidateQueries({ queryKey: ["school-coordinates"] });
-          setCordinateModalOpen(false);
+            toast.success("Location saved successfully ✅");
+            queryClient.invalidateQueries({ queryKey: ["school-coordinates"] });
+            setCordinateModalOpen(false);
         },
         onError: (err) => {
-          toast.error(err.message || "Failed to save location ❌");
+            toast.error(err.message || "Failed to save location ❌");
         },
-      });
+    });
     const handleChange = (path, value) => {
         setSchoolData((prev) => {
 
@@ -207,26 +211,27 @@ mutationFn: (formData) => {
             return newData;
         });
     };
-useEffect(() => {
-  if (schoolSettingsData?.results) {
-    setSchoolData((prev) => ({
-      ...prev,
-      ...schoolSettingsData.results,
-    }));
+    useEffect(() => {
+        if (schoolSettingsData?.results) {
+            setSchoolData((prev) => ({
+                ...prev,
+                ...schoolSettingsData.results,
+            }));
 
-    if (schoolSettingsData.results.schoolLogo) {
-      setLogoPreview(schoolSettingsData.results.schoolLogo);
-    }
-  } else {
-    setSchoolData(initialSchoolData);
-    setLogoPreview(null);
-  }
-}, [schoolSettingsData]);
-useEffect(() => {
-  if (activeSession?._id && !academicYearFilter) {
-    setAcademicYearFilter(activeSession._id);
-  }
-}, [activeSession]);
+            if (schoolSettingsData.results.schoolLogo) {
+                setLogoPreview(schoolSettingsData.results.schoolLogo);
+            }
+        } else {
+            setSchoolData(initialSchoolData);
+            setLogoPreview(null);
+        }
+    }, [schoolSettingsData]);
+
+    useEffect(() => {
+        if (activeSession?._id && !academicYearFilter) {
+            setAcademicYearFilter(activeSession._id);
+        }
+    }, [activeSession]);
     // const countryOptions = Country.getAllCountries().map(country => ({
     //     value: country.isoCode,
     //     label: country.name,
@@ -266,11 +271,11 @@ useEffect(() => {
     //     }));
     // };
 
-  const minutesToTime = (mins) => {
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-  };
+    const minutesToTime = (mins) => {
+        const h = Math.floor(mins / 60);
+        const m = mins % 60;
+        return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+    };
 
     const handleMarksChange = (index, field, value) => {
         setSchoolData(prev => {
@@ -279,50 +284,50 @@ useEffect(() => {
             return newData;
         });
     };
-      const getEffectiveBreakCount = (totalPeriods, lunchEnabled) => {
-    if (totalPeriods <= 1) return 0;
+    const getEffectiveBreakCount = (totalPeriods, lunchEnabled) => {
+        if (totalPeriods <= 1) return 0;
 
-    // lunch enabled → 2 breaks removed
-    if (lunchEnabled) {
-      return Math.max(totalPeriods - 2, 0);
-    }
+        // lunch enabled → 2 breaks removed
+        if (lunchEnabled) {
+            return Math.max(totalPeriods - 2, 0);
+        }
 
-    // lunch disabled → normal breaks
-    return Math.max(totalPeriods - 1, 0);
-  };
+        // lunch disabled → normal breaks
+        return Math.max(totalPeriods - 1, 0);
+    };
     const getPossibleLunchTimes = (data) => {
-    const { schoolTiming, periods } = data;
+        const { schoolTiming, periods } = data;
 
-    if (
-      !schoolTiming.startTime ||
-      !periods.totalPeriods ||
-      !periods.periodDuration
-    ) {
-      return [];
-    }
+        if (
+            !schoolTiming.startTime ||
+            !periods.totalPeriods ||
+            !periods.periodDuration
+        ) {
+            return [];
+        }
 
-    const totalPeriods = Number(periods.totalPeriods);
-    const periodDuration = Number(periods.periodDuration);
-    const breakDuration = Number(periods.breakDuration || 0);
+        const totalPeriods = Number(periods.totalPeriods);
+        const periodDuration = Number(periods.periodDuration);
+        const breakDuration = Number(periods.breakDuration || 0);
 
-    let current = timeToMinutes(schoolTiming.startTime);
-    const options = [];
+        let current = timeToMinutes(schoolTiming.startTime);
+        const options = [];
 
-    for (let i = 1; i < totalPeriods; i++) {
-      // finish period
-      current += periodDuration;
+        for (let i = 1; i < totalPeriods; i++) {
+            // finish period
+            current += periodDuration;
 
-      options.push({
-        label: `After Period ${i} (${minutesToTime(current)})`,
-        value: minutesToTime(current),
-      });
+            options.push({
+                label: `After Period ${i} (${minutesToTime(current)})`,
+                value: minutesToTime(current),
+            });
 
-      // add break before next period
-      current += breakDuration;
-    }
+            // add break before next period
+            current += breakDuration;
+        }
 
-    return options;
-  };
+        return options;
+    };
     const handleSocialChange = (index, field, value) => {
         const trimmedValue = field === "url" ? value.trim() : value;
 
@@ -428,7 +433,7 @@ useEffect(() => {
         value: session,   // ✅ FULL OBJECT (critical)
         label: session.academicSession,
     }));
-  
+
     const getSocialLogoPreview = (logo) => {
         if (!logo) return "";
 
@@ -490,17 +495,17 @@ useEffect(() => {
             }
         );
     };
-      const getImagePreview = (img) => {
-    if (img instanceof File || img instanceof Blob)
-      return URL.createObjectURL(img);
+    const getImagePreview = (img) => {
+        if (img instanceof File || img instanceof Blob)
+            return URL.createObjectURL(img);
 
-    if (typeof img?.image === "string")
-      return img.image.startsWith("http")
-        ? img.image
-        : `${import.meta.env.VITE_API_BASE_URL}${img.image}`;
+        if (typeof img?.image === "string")
+            return img.image.startsWith("http")
+                ? img.image
+                : `${import.meta.env.VITE_API_BASE_URL}${img.image}`;
 
-    return "";
-  };
+        return "";
+    };
     return {
         schoolData,
         setSchoolData,

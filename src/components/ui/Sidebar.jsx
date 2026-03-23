@@ -212,7 +212,7 @@ const TailwindSidebar = () => {
           icon: School,
           hasSubmenu: true,
           submenu: [
-            { id: 'school-setting', label: 'School Setting', icon: Calendar, href: '/admin/settings/school-setting' },
+            { id: 'school-setting', label: 'School Setting', icon: Settings, href: '/admin/settings/school-setting' },
             { id: 'academic-year', label: 'Academic Year', icon: Calendar, href: '/admin/settings/academic-year' },
 
             {

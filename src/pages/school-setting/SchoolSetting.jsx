@@ -206,13 +206,14 @@ export default function SchoolSettings() {
                     >
                         Reset Defaults
                     </Button>
-                    <Button
-                        type="submit"
-                        // variant="contained"
-                        style={{ background: "bg-[rgb(var(--color-primary)_/_1)]", color: "black" }}
-                        // color="primary"
-                        disabled={mutation.isPending}
-                    >
+                  <Button
+  type="submit"
+  style={{
+    backgroundColor: "rgb(var(--color-primary) / 1)",
+    color: "white",
+  }}
+  disabled={mutation.isPending}
+>
                         {mutation.isPending ? "Saving..." : "Save Settings"}
                     </Button>
                 </Box>
