@@ -162,20 +162,20 @@ export default function Dashboard() {
   const [currentTheme, setCurrentTheme] = useState('light');
   const [showThemeMenu, setShowThemeMenu] = useState(false);
 
-  useEffect(() => {
-    // Apply theme to document element
-    const root = document.documentElement;
-    if (currentTheme === 'light') {
-      root.classList.remove('dark');
-      root.removeAttribute('data-theme');
-    } else if (currentTheme === 'dark') {
-      root.classList.add('dark');
-      root.removeAttribute('data-theme');
-    } else {
-      root.classList.remove('dark');
-      root.setAttribute('data-theme', currentTheme);
-    }
-  }, [currentTheme]);
+  // useEffect(() => {
+  //   // Apply theme to document element
+  //   const root = document.documentElement;
+  //   if (currentTheme === 'light') {
+  //     root.classList.remove('dark');
+  //     root.removeAttribute('data-theme');
+  //   } else if (currentTheme === 'dark') {
+  //     root.classList.add('dark');
+  //     root.removeAttribute('data-theme');
+  //   } else {
+  //     root.classList.remove('dark');
+  //     root.setAttribute('data-theme', currentTheme);
+  //   }
+  // }, [currentTheme]);
 
   const ThemeIcon = themes.find(t => t.id === currentTheme)?.icon || Sun;
 
@@ -183,68 +183,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-[rgb(var(--color-bg))] transition-colors duration-300">
       {/* Header with Theme Switcher */}
       <div className="sticky top-0 z-10 bg-[rgb(var(--color-surface))] backdrop-blur-xl border-b border-[rgb(var(--color-border))]">
-        <div className="px-4 md:px-8 py-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[rgb(var(--color-primary))] to-[rgb(var(--color-secondary))] bg-clip-text text-transparent">
-                School Analytics Dashboard
-              </h1>
-              <p className="text-sm text-[rgb(var(--color-muted))] mt-1">
-                Comprehensive overview of your institution's performance
-              </p>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              {/* Theme Switcher */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowThemeMenu(!showThemeMenu)}
-                  className="p-2 hover:bg-[rgb(var(--color-surface-hover))] rounded-lg transition-colors flex items-center gap-2"
-                >
-                  <Palette className="w-5 h-5 text-[rgb(var(--color-muted))]" />
-                  <ThemeIcon className="w-5 h-5 text-[rgb(var(--color-primary))]" />
-                </button>
-                
-                {showThemeMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-[rgb(var(--color-surface))] rounded-xl shadow-lg border border-[rgb(var(--color-border))] py-2 z-50">
-                    {themes.map((theme) => {
-                      const Icon = theme.icon;
-                      return (
-                        <button
-                          key={theme.id}
-                          onClick={() => {
-                            setCurrentTheme(theme.id);
-                            setShowThemeMenu(false);
-                          }}
-                          className={`w-full px-4 py-2 flex items-center gap-3 hover:bg-[rgb(var(--color-surface-hover))] transition-colors ${
-                            currentTheme === theme.id ? 'text-[rgb(var(--color-primary))]' : 'text-[rgb(var(--color-text))]'
-                          }`}
-                        >
-                          <Icon className="w-4 h-4" style={{ color: theme.color }} />
-                          <span className="text-sm">{theme.name}</span>
-                          {currentTheme === theme.id && (
-                            <span className="ml-auto w-2 h-2 rounded-full bg-[rgb(var(--color-primary))]" />
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              <button className="p-2 hover:bg-[rgb(var(--color-surface-hover))] rounded-lg transition-colors">
-                <Filter className="w-5 h-5 text-[rgb(var(--color-muted))]" />
-              </button>
-              <button className="p-2 hover:bg-[rgb(var(--color-surface-hover))] rounded-lg transition-colors">
-                <Download className="w-5 h-5 text-[rgb(var(--color-muted))]" />
-              </button>
-              <button className="px-4 py-2 bg-[rgb(var(--color-primary))] hover:bg-[rgb(var(--color-primary-dark))] text-white rounded-lg transition-colors flex items-center gap-2">
-                <span>Generate Report</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
+   
       </div>
 
       <div className="p-4 md:p-8 space-y-8">
@@ -287,8 +226,8 @@ export default function Dashboard() {
         {/* Charts Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Student Growth Chart */}
-          <ChartCard 
-            title="Student Growth Analysis" 
+          <ChartCard
+            title="Student Growth Analysis"
             action={<MoreVertical className="w-5 h-5 text-[rgb(var(--color-muted))]" />}
             className="lg:col-span-2"
           >
@@ -297,42 +236,42 @@ export default function Dashboard() {
                 <ComposedChart data={studentData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                   <defs>
                     <linearGradient id="studentGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={chartColors.primary} stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor={chartColors.primary} stopOpacity={0}/>
+                      <stop offset="5%" stopColor={chartColors.primary} stopOpacity={0.1} />
+                      <stop offset="95%" stopColor={chartColors.primary} stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke={chartColors.border} vertical={false} />
-                  <XAxis 
-                    dataKey="month" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: chartColors.muted, fontSize: 12 }} 
+                  <XAxis
+                    dataKey="month"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: chartColors.muted, fontSize: 12 }}
                   />
-                  <YAxis 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: chartColors.muted, fontSize: 12 }} 
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: chartColors.muted, fontSize: 12 }}
                   />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend />
-                  <Area 
-                    type="monotone" 
-                    dataKey="target" 
-                    fill="url(#studentGradient)" 
-                    stroke="transparent" 
+                  <Area
+                    type="monotone"
+                    dataKey="target"
+                    fill="url(#studentGradient)"
+                    stroke="transparent"
                     name="Target"
                   />
-                  <Bar 
-                    dataKey="previous" 
-                    fill={chartColors.border} 
-                    radius={[4, 4, 0, 0]} 
-                    name="Previous Year" 
+                  <Bar
+                    dataKey="previous"
+                    fill={chartColors.border}
+                    radius={[4, 4, 0, 0]}
+                    name="Previous Year"
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="students" 
-                    stroke={chartColors.primary} 
-                    strokeWidth={3} 
+                  <Line
+                    type="monotone"
+                    dataKey="students"
+                    stroke={chartColors.primary}
+                    strokeWidth={3}
                     dot={{ r: 6, fill: chartColors.primary, strokeWidth: 2, stroke: chartColors.surface }}
                     activeDot={{ r: 8, fill: chartColors.primary }}
                     name="Current Year"
@@ -349,25 +288,25 @@ export default function Dashboard() {
                 <BarChart data={feeData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                   <defs>
                     <linearGradient id="collectedGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={chartColors.secondary} stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor={chartColors.secondary} stopOpacity={0.4}/>
+                      <stop offset="5%" stopColor={chartColors.secondary} stopOpacity={0.8} />
+                      <stop offset="95%" stopColor={chartColors.secondary} stopOpacity={0.4} />
                     </linearGradient>
                     <linearGradient id="pendingGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={chartColors.warning} stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor={chartColors.warning} stopOpacity={0.4}/>
+                      <stop offset="5%" stopColor={chartColors.warning} stopOpacity={0.8} />
+                      <stop offset="95%" stopColor={chartColors.warning} stopOpacity={0.4} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke={chartColors.border} vertical={false} />
-                  <XAxis 
-                    dataKey="month" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: chartColors.muted, fontSize: 12 }} 
+                  <XAxis
+                    dataKey="month"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: chartColors.muted, fontSize: 12 }}
                   />
-                  <YAxis 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: chartColors.muted, fontSize: 12 }} 
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: chartColors.muted, fontSize: 12 }}
                   />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend />
@@ -388,38 +327,38 @@ export default function Dashboard() {
                 <AreaChart data={attendanceData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                   <defs>
                     <linearGradient id="attendanceGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={chartColors.info} stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor={chartColors.info} stopOpacity={0}/>
+                      <stop offset="5%" stopColor={chartColors.info} stopOpacity={0.3} />
+                      <stop offset="95%" stopColor={chartColors.info} stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke={chartColors.border} vertical={false} />
-                  <XAxis 
-                    dataKey="day" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: chartColors.muted, fontSize: 12 }} 
+                  <XAxis
+                    dataKey="day"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: chartColors.muted, fontSize: 12 }}
                   />
-                  <YAxis 
-                    domain={[80, 100]} 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: chartColors.muted, fontSize: 12 }} 
+                  <YAxis
+                    domain={[80, 100]}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: chartColors.muted, fontSize: 12 }}
                   />
                   <Tooltip content={<CustomTooltip />} />
-                  <Area 
-                    type="monotone" 
-                    dataKey="attendance" 
-                    stroke={chartColors.info} 
+                  <Area
+                    type="monotone"
+                    dataKey="attendance"
+                    stroke={chartColors.info}
                     strokeWidth={3}
-                    fill="url(#attendanceGradient)" 
+                    fill="url(#attendanceGradient)"
                     name="This Week"
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="average" 
-                    stroke={chartColors.muted} 
-                    strokeWidth={2} 
-                    strokeDasharray="5 5" 
+                  <Line
+                    type="monotone"
+                    dataKey="average"
+                    stroke={chartColors.muted}
+                    strokeWidth={2}
+                    strokeDasharray="5 5"
                     name="Average"
                   />
                 </AreaChart>
@@ -433,22 +372,22 @@ export default function Dashboard() {
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={departmentData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                   <PolarGrid gridType="circle" stroke={chartColors.border} />
-                  <PolarAngleAxis 
-                    dataKey="name" 
-                    tick={{ fill: chartColors.muted, fontSize: 12 }} 
+                  <PolarAngleAxis
+                    dataKey="name"
+                    tick={{ fill: chartColors.muted, fontSize: 12 }}
                   />
-                  <PolarRadiusAxis 
-                    angle={30} 
-                    domain={[0, 100]} 
-                    tick={{ fill: chartColors.muted, fontSize: 12 }} 
+                  <PolarRadiusAxis
+                    angle={30}
+                    domain={[0, 100]}
+                    tick={{ fill: chartColors.muted, fontSize: 12 }}
                     stroke={chartColors.border}
                   />
-                  <Radar 
-                    name="Performance" 
-                    dataKey="performance" 
-                    stroke={chartColors.primary} 
-                    fill={chartColors.primary} 
-                    fillOpacity={0.5} 
+                  <Radar
+                    name="Performance"
+                    dataKey="performance"
+                    stroke={chartColors.primary}
+                    fill={chartColors.primary}
+                    fillOpacity={0.5}
                   />
                   <Tooltip content={<CustomTooltip />} />
                 </RadarChart>
@@ -473,9 +412,9 @@ export default function Dashboard() {
                     labelLine={false}
                   >
                     {genderData.map((entry, index) => (
-                      <Cell 
-                        key={`cell-${index}`} 
-                        fill={index === 0 ? chartColors.info : chartColors.pink} 
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={index === 0 ? chartColors.info : chartColors.pink}
                       />
                     ))}
                   </Pie>
@@ -483,15 +422,15 @@ export default function Dashboard() {
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
-              
+
               {/* Gender Stats */}
               <div className="flex justify-center gap-8 mt-4">
                 {genderData.map((item, index) => (
                   <div key={item.name} className="text-center">
                     <div className="flex items-center gap-2">
-                      <div 
-                        className="w-3 h-3 rounded-full" 
-                        style={{ backgroundColor: index === 0 ? chartColors.info : chartColors.pink }} 
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: index === 0 ? chartColors.info : chartColors.pink }}
                       />
                       <span className="text-sm font-medium text-[rgb(var(--color-text))]">{item.name}</span>
                     </div>
@@ -512,33 +451,33 @@ export default function Dashboard() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={performanceData} layout="vertical" margin={{ top: 20, right: 30, left: 50, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={chartColors.border} horizontal={false} />
-                  <XAxis 
-                    type="number" 
-                    domain={[0, 100]} 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: chartColors.muted, fontSize: 12 }} 
+                  <XAxis
+                    type="number"
+                    domain={[0, 100]}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: chartColors.muted, fontSize: 12 }}
                   />
-                  <YAxis 
-                    dataKey="subject" 
-                    type="category" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: chartColors.muted, fontSize: 12 }} 
+                  <YAxis
+                    dataKey="subject"
+                    type="category"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: chartColors.muted, fontSize: 12 }}
                   />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend />
-                  <Bar 
-                    dataKey="score" 
-                    fill={chartColors.primary} 
-                    radius={[0, 4, 4, 0]} 
-                    name="School Score" 
+                  <Bar
+                    dataKey="score"
+                    fill={chartColors.primary}
+                    radius={[0, 4, 4, 0]}
+                    name="School Score"
                   />
-                  <Bar 
-                    dataKey="average" 
-                    fill={chartColors.muted} 
-                    radius={[0, 4, 4, 0]} 
-                    name="National Average" 
+                  <Bar
+                    dataKey="average"
+                    fill={chartColors.muted}
+                    radius={[0, 4, 4, 0]}
+                    name="National Average"
                   />
                 </BarChart>
               </ResponsiveContainer>
@@ -613,11 +552,11 @@ export default function Dashboard() {
 // Enhanced Stat Card Component with theme variables
 function StatCard({ icon, title, value, trend, trendLabel, iconBg }) {
   const isPositive = trend?.startsWith('+');
-  
+
   return (
     <div className="group relative bg-[rgb(var(--color-surface))] rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[rgb(var(--color-surface-hover))] opacity-0 group-hover:opacity-100 transition-opacity" />
-      
+
       <div className="relative p-6">
         <div className="flex items-start justify-between">
           <div className="space-y-2">
@@ -631,15 +570,15 @@ function StatCard({ icon, title, value, trend, trendLabel, iconBg }) {
               <span className="text-xs text-[rgb(var(--color-muted))]">{trendLabel}</span>
             </div>
           </div>
-          
+
           <div className={`p-3 ${iconBg} rounded-xl text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
             {icon}
           </div>
         </div>
-        
+
         {/* Progress Bar */}
         <div className="mt-4 h-1.5 bg-[rgb(var(--color-border))] rounded-full overflow-hidden">
-          <div 
+          <div
             className={`h-full ${iconBg} rounded-full transition-all duration-500 group-hover:opacity-80`}
             style={{ width: `${Math.random() * 40 + 60}%` }}
           />
@@ -677,7 +616,7 @@ function MetricCard({ icon, label, value, change, color }) {
     warning: 'bg-[rgb(var(--color-warning))] bg-opacity-10 text-[rgb(var(--color-warning))]',
     info: 'bg-[rgb(var(--color-info))] bg-opacity-10 text-[rgb(var(--color-info))]'
   };
-  
+
   return (
     <div className="bg-[rgb(var(--color-surface))] rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300">
       <div className="flex items-center gap-3">

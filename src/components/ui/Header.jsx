@@ -205,9 +205,9 @@ const ModernHeader = () => {
 
           {/* Right Section */}
           <div className="flex items-center gap-2">
-            <button className="p-2.5 rounded-xl hover:bg-[rgb(var(--color-surface-hover))] text-[rgb(var(--color-muted))] transition-colors relative">
+            {/* <button className="p-2.5 rounded-xl hover:bg-[rgb(var(--color-surface-hover))] text-[rgb(var(--color-muted))] transition-colors relative">
               <Grid size={20} />
-            </button>
+            </button> */}
 
             {/* Theme Switcher with Color Grid */}
             <div ref={themeMenuRef} className="relative">

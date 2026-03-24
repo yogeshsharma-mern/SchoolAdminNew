@@ -6,7 +6,7 @@ import {
 } from '../../redux/features/ui/uislice';
 import { logout } from "../../redux/features/auth/authslice";
 import { Link } from 'react-router-dom';
-import {setSidebarCollapse}  from "../../redux/features/ui/uislice";
+import { setSidebarCollapse } from "../../redux/features/ui/uislice";
 
 import {
   // Dashboard
@@ -89,21 +89,21 @@ const TailwindSidebar = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, [dispatch]);
   useEffect(() => {
-  const handleResize = () => {
-    const isMobile = window.innerWidth < 1024;
+    const handleResize = () => {
+      const isMobile = window.innerWidth < 1024;
 
-    if (isMobile) {
-      dispatch(setSidebarCollapse(true)); // 📱 hide
-    } else {
-      dispatch(setSidebarCollapse(false)); // 💻 show
-    }
-  };
+      if (isMobile) {
+        dispatch(setSidebarCollapse(true)); // 📱 hide
+      } else {
+        dispatch(setSidebarCollapse(false)); // 💻 show
+      }
+    };
 
-  handleResize(); // ✅ run on mount
+    handleResize(); // ✅ run on mount
 
-  window.addEventListener("resize", handleResize);
-  return () => window.removeEventListener("resize", handleResize);
-}, [dispatch]);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [dispatch]);
 
   // Function to close sidebar on mobile when clicking a link
   const handleLinkClick = () => {
@@ -154,12 +154,29 @@ const TailwindSidebar = () => {
           icon: LayoutDashboard,
           href: '/admin/dashboard',
         },
+        // {
+        //   id: 'class',
+        //   label: 'Classes',
+        //   icon: ClipboardList,
+        //   href: '/admin/Classes',
+        //   notification: true
+        // },
         {
           id: 'class',
           label: 'Classes',
           icon: ClipboardList,
-          href: '/admin/Classes',
-          notification: true
+          hasSubmenu: true,
+          submenu: [
+            {
+              id: 'all-classes', label: 'Classes', icon: ClipboardList, href: '/admin/Classes',
+            },
+            {
+              id: 'section', label: 'Sections', icon: CalendarCheck, href: '/admin/Classes/sections',
+            },
+            // {
+            //   id: 'salary', label: 'Salary', icon: Wallet, href: '/admin/teachers/salary',
+            // },
+          ]
         },
         {
           id: 'subjects',
@@ -318,7 +335,7 @@ const TailwindSidebar = () => {
           border-r border-gray-200 dark:border-gray-800
           transition-all duration-300 ease-in-out
           flex flex-col
-          ${sidebarCollapsed ? 'w-20' : 'w-78'}
+          ${sidebarCollapsed ? 'w-20' : 'md:w-78 w-58'}
           ${sidebarCollapsed ? '-translate-x-full' : 'translate-x-0'} lg:translate-x-0
           shadow-xl
         `}

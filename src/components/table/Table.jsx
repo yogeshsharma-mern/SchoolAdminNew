@@ -186,7 +186,7 @@ export default function ReusableTable({
   const table = useReactTable({
     data,
     columns,
-    pageCount: Math.ceil(totalCount),
+pageCount: Math.ceil(totalCount / paginationState.pageSize),
     manualPagination: true,
     state: {
       pagination: paginationState,
