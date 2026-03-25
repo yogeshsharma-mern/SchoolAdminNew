@@ -4,6 +4,7 @@ import { toast } from "react-hot-toast";
 import apiPath from "../../api/apiPath";
 import { apiGet, apiPost, apiPut, apiDelete } from "../../api/apiFetch";
 import ReusableTable from "../../components/table/Table";
+import { useSelector } from "react-redux";
 
 /* ══════════════════════════════════════════
    Inline debounce hook
@@ -36,9 +37,9 @@ function formatDate(iso) {
 ══════════════════════════════════════════ */
 function validateSubject(data) {
   const errors = {};
-  if (!data.name?.trim())             errors.name = "Subject name is required";
+  if (!data.name?.trim()) errors.name = "Subject name is required";
   else if (data.name.trim().length < 2) errors.name = "Minimum 2 characters required";
-  if (data.description?.length > 200)  errors.description = "Max 200 characters allowed";
+  if (data.description?.length > 200) errors.description = "Max 200 characters allowed";
   return errors;
 }
 
@@ -47,52 +48,52 @@ function validateSubject(data) {
 ══════════════════════════════════════════ */
 const BookOpenIcon = (p) => (
   <svg {...p} fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-    <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/>
-    <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+    <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z" />
+    <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" />
   </svg>
 );
 const PlusIcon = (p) => (
   <svg {...p} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-    <path d="M12 5v14M5 12h14"/>
+    <path d="M12 5v14M5 12h14" />
   </svg>
 );
 const EditIcon = (p) => (
   <svg {...p} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
   </svg>
 );
 const TrashIcon = (p) => (
   <svg {...p} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-    <polyline points="3 6 5 6 21 6"/>
-    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
   </svg>
 );
 const XIcon = (p) => (
   <svg {...p} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-    <path d="M18 6L6 18M6 6l12 12"/>
+    <path d="M18 6L6 18M6 6l12 12" />
   </svg>
 );
 const AlertIcon = (p) => (
   <svg {...p} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-    <circle cx="12" cy="12" r="10"/>
-    <line x1="12" y1="8" x2="12" y2="12"/>
-    <line x1="12" y1="16" x2="12.01" y2="16"/>
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
   </svg>
 );
 const SpinnerIcon = (p) => (
   <svg {...p} fill="none" viewBox="0 0 24 24"
     style={{ ...(p.style || {}), animation: "subj-spin .7s linear infinite" }}>
-    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" opacity=".25"/>
-    <path fill="currentColor" opacity=".75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" opacity=".25" />
+    <path fill="currentColor" opacity=".75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
   </svg>
 );
 const CalendarIcon = (p) => (
   <svg {...p} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-    <rect x="3" y="4" width="18" height="18" rx="2"/>
-    <line x1="16" y1="2" x2="16" y2="6"/>
-    <line x1="8" y1="2" x2="8" y2="6"/>
-    <line x1="3" y1="10" x2="21" y2="10"/>
+    <rect x="3" y="4" width="18" height="18" rx="2" />
+    <line x1="16" y1="2" x2="16" y2="6" />
+    <line x1="8" y1="2" x2="8" y2="6" />
+    <line x1="3" y1="10" x2="21" y2="10" />
   </svg>
 );
 
@@ -346,18 +347,21 @@ function subjectColor(name = "") {
    MAIN COMPONENT
 ══════════════════════════════════════════ */
 export default function Subjects() {
-  const [isModalOpen, setIsModalOpen]         = useState(false);
-  const [modalMode, setModalMode]             = useState("add"); // "add" | "edit"
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState("add"); // "add" | "edit"
   const [selectedSubject, setSelectedSubject] = useState(null);
-  const [confirmDelete, setConfirmDelete]     = useState({ open: false, subject: null });
-  const [formData, setFormData]               = useState({ name: "", description: "" });
-  const [formErrors, setFormErrors]           = useState({});
-  const [touched, setTouched]                 = useState({});
+  const [confirmDelete, setConfirmDelete] = useState({ open: false, subject: null });
+  const [formData, setFormData] = useState({ name: "", description: "" });
+  const [formErrors, setFormErrors] = useState({});
+  const [touched, setTouched] = useState({});
+
+
+  const collapsed = useSelector((state)=>state.ui.sidebarCollapsed);
 
   // ReusableTable state
   const [paginationState, setPaginationState] = useState({ pageIndex: 0, pageSize: 10 });
-  const [sortingState,    setSortingState]    = useState([]);
-  const [globalFilter,    setGlobalFilter]    = useState("");
+  const [sortingState, setSortingState] = useState([]);
+  const [globalFilter, setGlobalFilter] = useState("");
 
   const searchQuery = useDebounce(globalFilter, 400);
   const queryClient = useQueryClient();
@@ -380,19 +384,19 @@ export default function Subjects() {
     queryFn: () => {
       const params = new URLSearchParams();
       if (searchQuery) params.append("search", searchQuery);
-      params.append("page",  paginationState.pageIndex + 1);
+      params.append("page", paginationState.pageIndex + 1);
       params.append("limit", paginationState.pageSize);
       return apiGet(`${apiPath.getAllSubjects}?${params}`);
     },
   });
 
   const totalCount = subjectsData?.results?.total || 0;
-  const tableData  = (subjectsData?.results?.docs || []).map((item) => ({
-    id:          item._id,
-    name:        item.name,
+  const tableData = (subjectsData?.results?.docs || []).map((item) => ({
+    id: item._id,
+    name: item.name,
     description: item.description || "—",
-    createdAt:   item.createdAt,
-    _raw:        item,
+    createdAt: item.createdAt,
+    _raw: item,
   }));
 
   /* ── Mutations ── */
@@ -443,7 +447,7 @@ export default function Subjects() {
     setIsModalOpen(true);
   };
 
-  const handleDelete     = (row) => setConfirmDelete({ open: true, subject: row });
+  const handleDelete = (row) => setConfirmDelete({ open: true, subject: row });
   const handleConfirmDel = () => {
     deleteMutation.mutate(confirmDelete.subject.id);
     setConfirmDelete({ open: false, subject: null });
@@ -641,22 +645,27 @@ export default function Subjects() {
         </div>
 
         {/* ── Table ── */}
-        <ReusableTable
-          columns={columns}
-          data={tableData}
-          paginationState={paginationState}
-          setPaginationState={setPaginationState}
-          sortingState={sortingState}
-          setSortingState={setSortingState}
-          globalFilter={globalFilter}
-          setGlobalFilter={setGlobalFilter}
-          totalCount={totalCount}
-          loading={isLoading}
-          fetching={isFetching}
-          isError={isError}
-          error={error}
-          tablePlaceholder="Search subjects…"
-        />
+        <div className={`
+  overflow-x-auto transition-all duration-300 w-[90vw]
+  ${collapsed ? "md:w-[90vw]" : "md:w-[73vw]"}
+`}>
+          <ReusableTable
+            columns={columns}
+            data={tableData}
+            paginationState={paginationState}
+            setPaginationState={setPaginationState}
+            sortingState={sortingState}
+            setSortingState={setSortingState}
+            globalFilter={globalFilter}
+            setGlobalFilter={setGlobalFilter}
+            totalCount={totalCount}
+            loading={isLoading}
+            fetching={isFetching}
+            isError={isError}
+            error={error}
+            tablePlaceholder="Search subjects…"
+          />
+        </div>
       </div>
 
       {/* ── Add / Edit Modal ── */}

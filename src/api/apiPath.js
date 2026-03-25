@@ -18,6 +18,12 @@ const apiPath = Object.freeze({
   createSubject: "/v1/admin/class/subject/reg",
   updateSubject: "/v1/admin/class/subject",
   deleteSubject: "/v1/admin/class/delete/subject",
+  addSubjectsToClass: "/v1/admin/class/add-subjects",
+  getClassSubjects: "/v1/admin/class/subjects",
+  removeSubjectsFromClass: "/v1/admin/class/remove-subjects",
+  registerTeacher: "/v1/register/teacher/",
+  createTeacher: "/v1/admin/teachers/register",
+  getAllTeachers: "/v1/admin/teachers/allteachers"
 
 });
 
